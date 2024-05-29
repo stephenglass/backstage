@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-plugin-http-client-proxy-backend
+  title: '@backstage/plugin-http-client-proxy-backend'
+spec:
+  lifecycle: experimental
+  type: backstage-backend-plugin
+  owner: maintainers

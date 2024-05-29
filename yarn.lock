@@ -5962,6 +5962,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@backstage/plugin-http-client-proxy-backend@^0.0.0, @backstage/plugin-http-client-proxy-backend@workspace:plugins/http-client-proxy-backend":
+  version: 0.0.0-use.local
+  resolution: "@backstage/plugin-http-client-proxy-backend@workspace:plugins/http-client-proxy-backend"
+  dependencies:
+    "@backstage/backend-common": "workspace:^"
+    "@backstage/backend-defaults": "workspace:^"
+    "@backstage/backend-plugin-api": "workspace:^"
+    "@backstage/cli": "workspace:^"
+    "@backstage/config": "workspace:^"
+    "@backstage/plugin-auth-backend": "workspace:^"
+    "@backstage/plugin-auth-backend-module-guest-provider": "workspace:^"
+    "@types/express": "*"
+    "@types/global-agent": ^2.1.3
+    "@types/supertest": ^2.0.8
+    express: ^4.17.1
+    express-promise-router: ^4.1.0
+    global-agent: ^3.0.0
+    msw: ^1.0.0
+    node-fetch: ^2.6.7
+    supertest: ^6.2.4
+    undici: ^6.18.1
+    winston: ^3.2.1
+    yn: ^4.0.0
+  languageName: unknown
+  linkType: soft
+
 "@backstage/plugin-kubernetes-backend@workspace:^, @backstage/plugin-kubernetes-backend@workspace:plugins/kubernetes-backend":
   version: 0.0.0-use.local
   resolution: "@backstage/plugin-kubernetes-backend@workspace:plugins/kubernetes-backend"
@@ -17202,6 +17228,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/global-agent@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "@types/global-agent@npm:2.1.3"
+  checksum: 6129b6d5ba871b9d111ddf91e6f9a1725d3f28bf2aa6869ec83bebd14c688cde4275ebea6fa45b0b1c00d78109d022c935f952e9e4876d76289d4706484776c3
+  languageName: node
+  linkType: hard
+
 "@types/google-protobuf@npm:^3.7.2":
   version: 3.15.12
   resolution: "@types/google-protobuf@npm:3.15.12"
@@ -25777,6 +25810,7 @@ __metadata:
     "@backstage/plugin-catalog-backend-module-scaffolder-entity-model": "workspace:^"
     "@backstage/plugin-catalog-backend-module-unprocessed": "workspace:^"
     "@backstage/plugin-devtools-backend": "workspace:^"
+    "@backstage/plugin-http-client-proxy-backend": ^0.0.0
     "@backstage/plugin-kubernetes-backend": "workspace:^"
     "@backstage/plugin-notifications-backend": "workspace:^"
     "@backstage/plugin-permission-backend": "workspace:^"
@@ -42213,6 +42247,13 @@ __metadata:
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
   checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
+  languageName: node
+  linkType: hard
+
+"undici@npm:^6.18.1":
+  version: 6.18.1
+  resolution: "undici@npm:6.18.1"
+  checksum: a317d8ae79b375d6fd24b7a5b194d5828194da41492435114349509f5e7c55ea888873e9c1c1525e0843d2b1684ad07af8ba86a98810d5de518d06a5dc5f3fb0
   languageName: node
   linkType: hard
 
