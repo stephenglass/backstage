@@ -51,10 +51,8 @@ const getProxyAgent = (proto: string) => {
 
   // https is optional
   // do http over https if it's specified as an option
-  if (proto === 'http') {
-    return process.env.BACKSTAGE_HTTPS_PROXY
-      ? new ProxyAgent(process.env.BACKSTAGE_HTTPS_PROXY)
-      : undefined;
+  if (proto === 'http' && process.env.BACKSTAGE_HTTPS_PROXY) {
+    return new ProxyAgent(process.env.BACKSTAGE_HTTPS_PROXY);
   }
 
   // proto is https or https isn't specified. get agent for http proxy
@@ -105,8 +103,6 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
         port: parsed ? Number.parseInt(parsed[2], 10) : 0,
       };
     });
-
-  console.log('No proxy rules: ', noProxyRules);
 
   function shouldProxy(hostname: string, port: number) {
     if (noProxyRules.length === 0) {
@@ -163,17 +159,17 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
             Number.parseInt(port, 10) || DEFAULT_PORTS[protocol] || 0;
 
           if (shouldProxy(nHost, nPort)) {
-            console.log('proxying!!!');
             const proxyAgent = getProxyAgent(nProto);
             if (proxyAgent) {
               return proxyAgent.dispatch(options, handler);
             }
           }
-          console.log('not proxying! :(');
         }
 
         return defaultDispatcher.dispatch(options, handler);
       }
     })(),
   );
+
+  configOptions.logger.info('Configured proxy settings for http clients');
 }
