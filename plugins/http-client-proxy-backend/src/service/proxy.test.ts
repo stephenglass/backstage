@@ -15,29 +15,10 @@
  */
 
 import { loggerToWinstonLogger } from '@backstage/backend-common';
-import {
-  ConfigSources,
-  MutableConfigSource,
-  StaticConfigSource,
-} from '@backstage/config-loader';
-import express from 'express';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import request from 'supertest';
-import {
-  mockServices,
-  setupRequestMockHandlers,
-} from '@backstage/backend-test-utils';
+import { ConfigSources, StaticConfigSource } from '@backstage/config-loader';
+import { mockServices } from '@backstage/backend-test-utils';
 import { createProxyAgent } from './proxy';
-import {
-  setGlobalDispatcher,
-  getGlobalDispatcher,
-  Dispatcher,
-  ProxyAgent,
-  Agent,
-  MockAgent,
-  fetch as undiciFetch,
-} from 'undici';
+import { fetch as undiciFetch } from 'undici';
 import { default as nodeFetch } from 'node-fetch';
 
 // https://github.com/jest-community/eslint-plugin-jest/blob/v27.9.0/docs/rules/no-conditional-expect.md
@@ -61,19 +42,17 @@ describe('Requests are routed via proxy', () => {
   });
 
   it('should be able to proxy using native fetch', async () => {
-    const config = await ConfigSources.toConfig(
-      StaticConfigSource.create({
-        data: {
-          proxy: {
-            http_proxy: 'http://localhost:3000',
-            https_proxy: 'http://localhost:3000',
-          },
-        },
-      }),
-    );
-
     await createProxyAgent({
-      config,
+      config: await ConfigSources.toConfig(
+        StaticConfigSource.create({
+          data: {
+            proxy: {
+              http_proxy: 'http://localhost:3000',
+              https_proxy: 'http://localhost:3000',
+            },
+          },
+        }),
+      ),
       logger: loggerToWinstonLogger(mockServices.logger.mock()),
     });
 
@@ -88,25 +67,19 @@ describe('Requests are routed via proxy', () => {
   });
 
   it('should be able to no proxy using native fetch', async () => {
-    const logger = loggerToWinstonLogger(mockServices.logger.mock());
-
-    // Grab the subscriber function and use mutable config data to mock a config file change
-    // const mutableConfigSource = MutableConfigSource.create({ data: {} });
-    const config = await ConfigSources.toConfig(
-      StaticConfigSource.create({
-        data: {
-          proxy: {
-            http_proxy: 'http://localhost:3000',
-            https_proxy: 'http://localhost:3000',
-            no_proxy: 'localhost:5050',
-          },
-        },
-      }),
-    );
-
     await createProxyAgent({
-      config,
-      logger,
+      config: await ConfigSources.toConfig(
+        StaticConfigSource.create({
+          data: {
+            proxy: {
+              http_proxy: 'http://localhost:3000',
+              https_proxy: 'http://localhost:3000',
+              no_proxy: 'localhost:5050',
+            },
+          },
+        }),
+      ),
+      logger: loggerToWinstonLogger(mockServices.logger.mock()),
     });
 
     const error: Error = await getError(async () =>
@@ -119,13 +92,61 @@ describe('Requests are routed via proxy', () => {
     });
   });
 
-  it('should be able to proxy using node fetch', async () => {
-    const logger = loggerToWinstonLogger(mockServices.logger.mock());
+  it('should be able to no proxy using native fetch default http port', async () => {
+    await createProxyAgent({
+      config: await ConfigSources.toConfig(
+        StaticConfigSource.create({
+          data: {
+            proxy: {
+              http_proxy: 'http://localhost:3000',
+              https_proxy: 'http://localhost:3000',
+              no_proxy: 'localhost',
+            },
+          },
+        }),
+      ),
+      logger: loggerToWinstonLogger(mockServices.logger.mock()),
+    });
 
-    // Grab the subscriber function and use mutable config data to mock a config file change
-    const mutableConfigSource = MutableConfigSource.create({ data: {} });
-    const config = await ConfigSources.toConfig(
-      ConfigSources.merge([
+    const error: Error = await getError(async () =>
+      undiciFetch('http://localhost'),
+    );
+
+    expect(error.cause).toMatchObject({
+      address: '::1',
+      port: 80,
+    });
+  });
+
+  it('should be able to no proxy using native fetch default https port', async () => {
+    await createProxyAgent({
+      config: await ConfigSources.toConfig(
+        StaticConfigSource.create({
+          data: {
+            proxy: {
+              http_proxy: 'http://localhost:3000',
+              https_proxy: 'http://localhost:3000',
+              no_proxy: 'localhost',
+            },
+          },
+        }),
+      ),
+      logger: loggerToWinstonLogger(mockServices.logger.mock()),
+    });
+
+    const error: Error = await getError(async () =>
+      undiciFetch('https://localhost'),
+    );
+
+    expect(error.cause).toMatchObject({
+      address: '::1',
+      port: 443,
+    });
+  });
+
+  it('should be able to proxy using node fetch', async () => {
+    await createProxyAgent({
+      config: await ConfigSources.toConfig(
         StaticConfigSource.create({
           data: {
             proxy: {
@@ -134,13 +155,31 @@ describe('Requests are routed via proxy', () => {
             },
           },
         }),
-        mutableConfigSource,
-      ]),
+      ),
+      logger: loggerToWinstonLogger(mockServices.logger.mock()),
+    });
+
+    const error: Error = await getError(async () =>
+      nodeFetch('http://localhost:5050'),
     );
 
+    expect(error.message).toContain('::1:3000');
+  });
+
+  it('should be able to no proxy using node fetch', async () => {
     await createProxyAgent({
-      config,
-      logger,
+      config: await ConfigSources.toConfig(
+        StaticConfigSource.create({
+          data: {
+            proxy: {
+              http_proxy: 'http://localhost:3000',
+              https_proxy: 'http://localhost:3000',
+              no_proxy: 'localhost:5050',
+            },
+          },
+        }),
+      ),
+      logger: loggerToWinstonLogger(mockServices.logger.mock()),
     });
 
     const error: Error = await getError(async () =>
