@@ -17,13 +17,7 @@
 import { Config } from '@backstage/config';
 import { Logger } from 'winston';
 import { bootstrap } from 'global-agent';
-import {
-  setGlobalDispatcher,
-  getGlobalDispatcher,
-  Dispatcher,
-  ProxyAgent,
-  Agent,
-} from 'undici';
+import { setGlobalDispatcher, Dispatcher, ProxyAgent, Agent } from 'undici';
 
 export interface ProxyOptions {
   logger: Logger;
@@ -41,10 +35,6 @@ const DEFAULT_PORTS: { [key: string]: number } = {
 };
 
 const getProxyAgent = (proto: string) => {
-  console.log('getProxyAgent() Proto: ', proto);
-  console.log('getProxyAgent() Http: ', process.env.BACKSTAGE_HTTP_PROXY);
-  console.log('getProxyAgent() Https: ', process.env.BACKSTAGE_HTTPS_PROXY);
-
   if (proto !== 'http' && proto !== 'https') {
     return undefined;
   }
