@@ -74,13 +74,19 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
     process.env.BACKSTAGE_NO_PROXY = userConfig.noProxy;
   }
 
+  const noProxyValue = process.env.BACKSTAGE_NO_PROXY ?? '';
+
+  if (noProxyValue === '*') {
+    // Never proxy if NO_PROXY wildcard is set
+    // Return here so the proxy is never configured
+    return;
+  }
+
   // Global agent configures proxy agent used by node fetch requests globally
   bootstrap({ environmentVariableNamespace: 'BACKSTAGE_' });
 
   // Create a default dispatcher
   const defaultDispatcher = new Agent();
-
-  const noProxyValue = process.env.BACKSTAGE_NO_PROXY ?? '';
 
   const noProxyRules: ProxyRule[] = noProxyValue
     .split(',')
@@ -98,11 +104,6 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
     if (noProxyRules.length === 0) {
       // Always proxy if NO_PROXY is not set or empty.
       return true;
-    }
-
-    if (noProxyValue === '*') {
-      // Never proxy if wildcard is set.
-      return false;
     }
 
     for (const entry of noProxyRules) {
