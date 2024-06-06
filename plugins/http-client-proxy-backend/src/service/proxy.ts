@@ -26,7 +26,7 @@ export interface ProxyOptions {
 
 interface ProxyRule {
   hostname: string;
-  port: number;
+  port?: number;
 }
 
 const DEFAULT_PORTS: { [key: string]: number } = {
@@ -34,7 +34,7 @@ const DEFAULT_PORTS: { [key: string]: number } = {
   https: 443,
 };
 
-const getProxyAgent = (proto: string) => {
+function getProxyAgent(proto: string): ProxyAgent | undefined {
   if (proto !== 'http' && proto !== 'https') {
     return undefined;
   }
@@ -49,7 +49,51 @@ const getProxyAgent = (proto: string) => {
   return process.env.BACKSTAGE_HTTP_PROXY
     ? new ProxyAgent(process.env.BACKSTAGE_HTTP_PROXY)
     : undefined;
-};
+}
+
+export function createNoProxyRules(noProxyValue: string): ProxyRule[] {
+  return noProxyValue
+    .split(',')
+    .map(rule => rule.trim())
+    .filter(rule => rule.length > 0)
+    .map(entry => {
+      const parsed = entry.match(/^(.+):(\d+)$/);
+      return {
+        hostname: (parsed ? parsed[1] : entry).toLowerCase(),
+        port: parsed ? Number.parseInt(parsed[2], 10) : undefined,
+      };
+    });
+}
+
+export function shouldProxy(
+  hostname: string,
+  port: number | undefined,
+  rules: ProxyRule[],
+): boolean {
+  if (rules.length === 0) {
+    // Always proxy if NO_PROXY is not set or empty.
+    return true;
+  }
+
+  for (const entry of rules) {
+    if (entry.port && entry.port !== port) {
+      // Skip if ports don't match
+      continue;
+    }
+
+    if (!/^[.*]/.test(entry.hostname)) {
+      // No wildcards, so don't proxy only if there is not an exact match.
+      if (hostname === entry.hostname) {
+        return false;
+      }
+    } else if (hostname.endsWith(entry.hostname.replace(/^\*/, ''))) {
+      // Don't proxy if the hostname ends with the no_proxy host.
+      return false;
+    }
+  }
+
+  return true;
+}
 
 export async function createProxyAgent(configOptions: ProxyOptions) {
   // Read existing environment variables
@@ -85,46 +129,11 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
   // Global agent configures proxy agent used by node fetch requests globally
   bootstrap({ environmentVariableNamespace: 'BACKSTAGE_' });
 
+  // Create rules from the value
+  const noProxyRules = createNoProxyRules(noProxyValue);
+
   // Create a default dispatcher
   const defaultDispatcher = new Agent();
-
-  const noProxyRules: ProxyRule[] = noProxyValue
-    .split(',')
-    .map(rule => rule.trim())
-    .filter(rule => rule.length > 0)
-    .map(entry => {
-      const parsed = entry.match(/^(.+):(\d+)$/);
-      return {
-        hostname: (parsed ? parsed[1] : entry).toLowerCase(),
-        port: parsed ? Number.parseInt(parsed[2], 10) : 0,
-      };
-    });
-
-  function shouldProxy(hostname: string, port: number) {
-    if (noProxyRules.length === 0) {
-      // Always proxy if NO_PROXY is not set or empty.
-      return true;
-    }
-
-    for (const entry of noProxyRules) {
-      if (entry.port !== port) {
-        // Skip if ports don't match
-        continue;
-      }
-
-      if (!/^[.*]/.test(entry.hostname)) {
-        // No wildcards, so don't proxy only if there is not an exact match.
-        if (hostname === entry.hostname) {
-          return false;
-        }
-      } else if (hostname.endsWith(entry.hostname.replace(/^\*/, ''))) {
-        // Don't proxy if the hostname ends with the no_proxy host.
-        return false;
-      }
-    }
-
-    return true;
-  }
 
   setGlobalDispatcher(
     new (class extends Dispatcher {
@@ -138,18 +147,18 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
               ? new URL(options.origin)
               : options.origin;
 
-          // Stripping ports in this way instead of using parsedUrl.hostname to make
-          // sure that the brackets around IPv6 addresses are kept.
           const nProto = protocol.endsWith(':')
             ? protocol.slice(0, -1)
             : protocol;
 
+          // Stripping ports in this way instead of using parsedUrl.hostname to make
+          // sure that the brackets around IPv6 addresses are kept.
           const nHost = host.replace(/:\d*$/, '').toLowerCase();
 
           const nPort =
-            Number.parseInt(port, 10) || DEFAULT_PORTS[protocol] || 0;
+            Number.parseInt(port, 10) || DEFAULT_PORTS[protocol] || undefined;
 
-          if (shouldProxy(nHost, nPort)) {
+          if (shouldProxy(nHost, nPort, noProxyRules)) {
             const proxyAgent = getProxyAgent(nProto);
             if (proxyAgent) {
               return proxyAgent.dispatch(options, handler);
