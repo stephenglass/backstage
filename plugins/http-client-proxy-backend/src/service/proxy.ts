@@ -123,6 +123,9 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
   if (noProxyValue === '*') {
     // Never proxy if NO_PROXY wildcard is set
     // Return here so the proxy is never configured
+    configOptions.logger.info(
+      'Not configuring http client proxy while no proxy wildcard is set',
+    );
     return;
   }
 
