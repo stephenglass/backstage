@@ -174,5 +174,5 @@ export async function createProxyAgent(configOptions: ProxyOptions) {
     })(),
   );
 
-  configOptions.logger.info('Configured proxy settings for http clients');
+  configOptions.logger.info('Configured proxy settings for http(s) clients');
 }

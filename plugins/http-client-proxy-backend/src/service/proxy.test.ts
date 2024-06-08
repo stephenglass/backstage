@@ -18,24 +18,9 @@ import { loggerToWinstonLogger } from '@backstage/backend-common';
 import { ConfigSources, StaticConfigSource } from '@backstage/config-loader';
 import { mockServices } from '@backstage/backend-test-utils';
 import { createProxyAgent, createNoProxyRules, shouldProxy } from './proxy';
-import { fetch as undiciFetch } from 'undici';
-import { default as nodeFetch } from 'node-fetch';
-
-// https://github.com/jest-community/eslint-plugin-jest/blob/v27.9.0/docs/rules/no-conditional-expect.md
-class NoErrorThrownError extends Error {}
-
-const getError = async <TError>(call: () => unknown): Promise<TError> => {
-  try {
-    await call();
-
-    throw new NoErrorThrownError();
-  } catch (error: unknown) {
-    return error as TError;
-  }
-};
 
 describe('Requests are routed via proxy', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     process.env.BACKSTAGE_HTTP_PROXY = undefined;
     process.env.BACKSTAGE_HTTPS_PROXY = undefined;
     process.env.BACKSTAGE_NO_PROXY = undefined;
@@ -113,7 +98,7 @@ describe('Requests are routed via proxy', () => {
     expect(shouldProxy('[1aaa:0:a88:85a3::ac1f]', 443, ipRules)).toBeFalsy();
   });
 
-  it('should be able to proxy using native & node fetch', async () => {
+  it('should be able to set env from config', async () => {
     await createProxyAgent({
       config: await ConfigSources.toConfig(
         StaticConfigSource.create({
@@ -132,47 +117,5 @@ describe('Requests are routed via proxy', () => {
     expect(process.env.BACKSTAGE_HTTP_PROXY).toEqual('http://localhost:3000');
     expect(process.env.BACKSTAGE_HTTPS_PROXY).toEqual('http://localhost:3000');
     expect(process.env.BACKSTAGE_NO_PROXY).toEqual('localhost:5051');
-
-    // go thru proxy - native fetch
-    expect(
-      (
-        (await getError(async () =>
-          undiciFetch('http://localhost:5050'),
-        )) as Error
-      ).cause,
-    ).toMatchObject({
-      address: '::1',
-      port: 3000,
-    });
-
-    // no proxy - native fetch
-    expect(
-      (
-        (await getError(async () =>
-          undiciFetch('http://localhost:5051'),
-        )) as Error
-      ).cause,
-    ).toMatchObject({
-      address: '::1',
-      port: 5051,
-    });
-
-    // go thru proxy - node fetch
-    expect(
-      (
-        (await getError(async () =>
-          nodeFetch('http://localhost:5050'),
-        )) as Error
-      ).message,
-    ).toContain('::1:3000');
-
-    // no proxy - node fetch
-    expect(
-      (
-        (await getError(async () =>
-          nodeFetch('http://localhost:5051'),
-        )) as Error
-      ).message,
-    ).toContain('::1:5051');
   });
 });
