@@ -16,7 +16,7 @@
 
 import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
-import Input from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Toolbar from '@material-ui/core/Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
@@ -30,7 +30,10 @@ import { catalogReactTranslationRef } from '../../translation';
 import { useTranslationRef } from '@backstage/core-plugin-api/alpha';
 
 /** @public */
-export type CatalogReactEntitySearchBarClassKey = 'searchToolbar' | 'input';
+export type CatalogReactEntitySearchBarClassKey =
+  | 'searchToolbar'
+  | 'input'
+  | 'formControl';
 
 const useStyles = makeStyles(
   _theme => ({
@@ -39,6 +42,7 @@ const useStyles = makeStyles(
       paddingRight: 0,
     },
     input: {},
+    formControl: {},
   }),
   {
     name: 'CatalogReactEntitySearchBar',
@@ -83,8 +87,8 @@ export const EntitySearchBar = () => {
 
   return (
     <Toolbar className={classes.searchToolbar}>
-      <FormControl>
-        <Input
+      <FormControl className={classes.formControl}>
+        <TextField
           aria-label="search"
           id="input-with-icon-adornment"
           className={classes.input}
@@ -92,23 +96,25 @@ export const EntitySearchBar = () => {
           autoComplete="off"
           onChange={event => setSearch(event.target.value)}
           value={search}
-          startAdornment={
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          }
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="clear search"
-                onClick={() => setSearch('')}
-                edge="end"
-                disabled={search.length === 0}
-              >
-                <Clear />
-              </IconButton>
-            </InputAdornment>
-          }
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="clear search"
+                  onClick={() => setSearch('')}
+                  edge="end"
+                  disabled={search.length === 0}
+                >
+                  <Clear />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
       </FormControl>
     </Toolbar>
