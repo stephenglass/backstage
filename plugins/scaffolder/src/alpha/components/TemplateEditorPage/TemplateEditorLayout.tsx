@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, forwardRef } from 'react';
 import { WithStyles, withStyles } from '@material-ui/core/styles';
 
 export const TemplateEditorLayout = withStyles(
@@ -24,19 +24,18 @@ export const TemplateEditorLayout = withStyles(
       gridArea: 'pageContent',
       display: 'grid',
       gridTemplateAreas: `
-      "toolbar"
-      "browser"
-      "editor"
-      "preview"
-      "results"
-    `,
+        "toolbar"
+        "browser"
+        "mainPanels"
+        "results"
+      `,
       [theme.breakpoints.up('md')]: {
         gridTemplateAreas: `
-      "toolbar toolbar toolbar"
-      "browser editor preview"
-      "results results results"
-    `,
-        gridTemplateColumns: '1fr 3fr 2fr',
+          "toolbar toolbar toolbar"
+          "browser mainPanels mainPanels"
+          "results results results"
+        `,
+        gridTemplateColumns: '1fr 5fr',
         gridTemplateRows: 'auto 1fr auto',
       },
     },
@@ -72,24 +71,64 @@ export const TemplateEditorLayoutBrowser = withStyles(
   <section className={classes.root}>{children}</section>
 ));
 
+export const TemplateEditorLayoutMainPanels = withStyles(
+  {
+    root: {
+      gridArea: 'mainPanels',
+      display: 'flex',
+      flexDirection: 'row',
+      width: '100%',
+      height: '100%',
+      position: 'relative',
+      minHeight: 0, // allow children to shrink
+    },
+  },
+  { name: 'ScaffolderTemplateEditorLayoutMainPanels' },
+)(
+  forwardRef<HTMLDivElement, PropsWithChildren<WithStyles>>(
+    ({ children, classes }, ref) => (
+      <div className={classes.root} ref={ref}>
+        {children}
+      </div>
+    ),
+  ),
+);
+
 export const TemplateEditorLayoutFiles = withStyles(
   {
     root: {
-      gridArea: 'editor',
+      height: '100%',
       overflow: 'auto',
+      minWidth: 200,
+      maxWidth: '80%',
+      flexGrow: 0,
+      flexShrink: 0,
+      paddingRight: 8,
+      // flexBasis and width will be set inline by parent
     },
   },
   { name: 'ScaffolderTemplateEditorLayoutFiles' },
-)(({ children, classes }: PropsWithChildren<WithStyles>) => (
-  <section className={classes.root}>{children}</section>
-));
+)(
+  ({
+    children,
+    classes,
+    style,
+  }: PropsWithChildren<WithStyles> & { style?: React.CSSProperties }) => (
+    <section className={classes.root} style={style}>
+      {children}
+    </section>
+  ),
+);
 
 export const TemplateEditorLayoutPreview = withStyles(
   theme => ({
     root: {
-      gridArea: 'preview',
+      height: '100%',
       position: 'relative',
       backgroundColor: theme.palette.background.default,
+      minWidth: 200,
+      flex: 1,
+      paddingLeft: 8, // Add space between divider and preview
       [theme.breakpoints.up('md')]: {
         borderLeft: `1px solid ${theme.palette.divider}`,
       },

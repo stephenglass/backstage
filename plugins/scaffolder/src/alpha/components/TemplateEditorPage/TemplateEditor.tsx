@@ -34,6 +34,7 @@ import {
   TemplateEditorLayoutFiles,
   TemplateEditorLayoutPreview,
   TemplateEditorLayoutConsole,
+  TemplateEditorLayoutMainPanels,
 } from './TemplateEditorLayout';
 import { TemplateEditorToolbar } from './TemplateEditorToolbar';
 import { TemplateEditorToolbarFileMenu } from './TemplateEditorToolbarFileMenu';
@@ -42,6 +43,8 @@ import { TemplateEditorTextArea } from './TemplateEditorTextArea';
 import { TemplateEditorForm } from './TemplateEditorForm';
 import { DryRunProvider } from './DryRunContext';
 import { DryRunResults } from './DryRunResults';
+import { useAdjustablePanelWidth } from './useAdjustablePanelWidth';
+import { AdjustablePanelWidthButton } from './AdjustablePanelWidthButton';
 
 /** @public */
 export type ScaffolderTemplateEditorClassKey =
@@ -72,6 +75,13 @@ export const TemplateEditor = (props: {
     closeDirectory().then(() => navigate(editLink()));
   }, [closeDirectory, navigate, editLink]);
 
+  const {
+    panelWidth: filesPanelWidth,
+    containerRef,
+    handleMouseDown,
+    handleResizeKeyDown,
+  } = useAdjustablePanelWidth({ initialPercent: 50 });
+
   return (
     <DirectoryEditorProvider directory={directory}>
       <DryRunProvider>
@@ -88,17 +98,25 @@ export const TemplateEditor = (props: {
           <TemplateEditorLayoutBrowser>
             <TemplateEditorBrowser onClose={closeDirectory} />
           </TemplateEditorLayoutBrowser>
-          <TemplateEditorLayoutFiles>
-            <TemplateEditorTextArea.DirectoryEditor errorText={errorText} />
-          </TemplateEditorLayoutFiles>
-          <TemplateEditorLayoutPreview>
-            <TemplateEditorForm.DirectoryEditorDryRun
-              setErrorText={setErrorText}
-              fieldExtensions={fieldExtensions}
-              layouts={layouts}
-              formProps={formProps}
+          <TemplateEditorLayoutMainPanels ref={containerRef}>
+            <TemplateEditorLayoutFiles
+              style={{ flexBasis: `${filesPanelWidth}%`, height: '100%' }}
+            >
+              <TemplateEditorTextArea.DirectoryEditor errorText={errorText} />
+            </TemplateEditorLayoutFiles>
+            <AdjustablePanelWidthButton
+              onMouseDown={handleMouseDown}
+              onKeyDown={handleResizeKeyDown}
             />
-          </TemplateEditorLayoutPreview>
+            <TemplateEditorLayoutPreview>
+              <TemplateEditorForm.DirectoryEditorDryRun
+                setErrorText={setErrorText}
+                fieldExtensions={fieldExtensions}
+                layouts={layouts}
+                formProps={formProps}
+              />
+            </TemplateEditorLayoutPreview>
+          </TemplateEditorLayoutMainPanels>
           <TemplateEditorLayoutConsole>
             <DryRunResults />
           </TemplateEditorLayoutConsole>
