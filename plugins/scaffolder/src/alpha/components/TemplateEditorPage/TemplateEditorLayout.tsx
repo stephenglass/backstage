@@ -26,13 +26,14 @@ export const TemplateEditorLayout = withStyles(
       gridTemplateAreas: `
         "toolbar"
         "browser"
-        "mainPanels"
+        "editor"
+        "preview"
         "results"
       `,
       [theme.breakpoints.up('md')]: {
         gridTemplateAreas: `
           "toolbar toolbar toolbar"
-          "browser mainPanels mainPanels"
+          "browser adjustable adjustable"
           "results results results"
         `,
         gridTemplateColumns: '1fr 5fr',
@@ -71,19 +72,19 @@ export const TemplateEditorLayoutBrowser = withStyles(
   <section className={classes.root}>{children}</section>
 ));
 
-export const TemplateEditorLayoutMainPanels = withStyles(
-  {
+export const TemplateEditorLayoutAdjustableArea = withStyles(
+  theme => ({
     root: {
-      gridArea: 'mainPanels',
-      display: 'flex',
-      flexDirection: 'row',
-      width: '100%',
-      height: '100%',
-      position: 'relative',
-      minHeight: 0, // allow children to shrink
+      [theme.breakpoints.up('md')]: {
+        gridArea: 'adjustable',
+        display: 'flex',
+        flexDirection: 'row',
+        position: 'relative',
+        minHeight: 0,
+      },
     },
-  },
-  { name: 'ScaffolderTemplateEditorLayoutMainPanels' },
+  }),
+  { name: 'ScaffolderTemplateEditorLayoutAdjustableArea' },
 )(
   forwardRef<HTMLDivElement, PropsWithChildren<WithStyles>>(
     ({ children, classes }, ref) => (
@@ -94,19 +95,33 @@ export const TemplateEditorLayoutMainPanels = withStyles(
   ),
 );
 
-export const TemplateEditorLayoutFiles = withStyles(
-  {
+export const TemplateEditorLayoutAdjustablePanel = withStyles(
+  theme => ({
     root: {
-      height: '100%',
-      overflow: 'auto',
-      minWidth: 200,
-      maxWidth: '80%',
-      flexGrow: 0,
-      flexShrink: 0,
-      paddingRight: 8,
-      // flexBasis and width will be set inline by parent
+      [theme.breakpoints.down('md')]: {
+        display: 'none',
+      },
     },
-  },
+  }),
+  { name: 'ScaffolderTemplateEditorLayoutAdjustablePanel' },
+)(({ children, classes }: PropsWithChildren<WithStyles>) => (
+  <div className={classes.root}>{children}</div>
+));
+
+export const TemplateEditorLayoutFiles = withStyles(
+  theme => ({
+    root: {
+      gridArea: 'editor',
+      overflow: 'auto',
+      [theme.breakpoints.up('md')]: {
+        // adjustable properties
+        minWidth: 200,
+        maxWidth: '80%',
+        flexGrow: 0,
+        flexShrink: 0,
+      },
+    },
+  }),
   { name: 'ScaffolderTemplateEditorLayoutFiles' },
 )(
   ({
@@ -123,14 +138,13 @@ export const TemplateEditorLayoutFiles = withStyles(
 export const TemplateEditorLayoutPreview = withStyles(
   theme => ({
     root: {
-      height: '100%',
+      gridArea: 'preview',
       position: 'relative',
       backgroundColor: theme.palette.background.default,
-      minWidth: 200,
-      flex: 1,
-      paddingLeft: 8, // Add space between divider and preview
       [theme.breakpoints.up('md')]: {
-        borderLeft: `1px solid ${theme.palette.divider}`,
+        // adjustable properties
+        minWidth: 200,
+        flex: 1,
       },
     },
     scroll: {

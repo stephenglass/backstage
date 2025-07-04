@@ -39,6 +39,8 @@ import {
   TemplateEditorLayoutToolbar,
   TemplateEditorLayoutFiles,
   TemplateEditorLayoutPreview,
+  TemplateEditorLayoutAdjustableArea,
+  TemplateEditorLayoutAdjustablePanel,
 } from './TemplateEditorLayout';
 import { TemplateEditorToolbar } from './TemplateEditorToolbar';
 import { TemplateEditorToolbarFileMenu } from './TemplateEditorToolbarFileMenu';
@@ -48,6 +50,8 @@ import {
 } from './TemplateEditorToolbarTemplatesMenu';
 import { TemplateEditorForm } from './TemplateEditorForm';
 import { TemplateEditorTextArea } from './TemplateEditorTextArea';
+import { useAdjustablePanelWidth } from './useAdjustablePanelWidth';
+import { AdjustablePanelWidthButton } from './AdjustablePanelWidthButton';
 
 const EXAMPLE_TEMPLATE_PARAMS_YAML = `# Edit the template parameters below to see how they will render in the scaffolder form UI
 parameters:
@@ -110,10 +114,10 @@ const useStyles = makeStyles(
       [theme.breakpoints.up('md')]: {
         gridTemplateAreas: `
       "toolbar toolbar"
-      "textArea preview"
+      "adjustable adjustable"
     `,
         gridTemplateRows: 'auto 1fr',
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: '1fr',
       },
     },
     files: {
@@ -193,6 +197,14 @@ export const TemplateFormPreviewer = ({
     [setSelectedTemplate, setTemplateYaml],
   );
 
+  const {
+    panelWidth: filesPanelWidth,
+    containerRef,
+    handleMouseDown,
+    handleResizeKeyDown,
+  } = useAdjustablePanelWidth({ initialPercent: 50 });
+
+  // Use a flex row for the main panels (editor, divider, preview)
   return (
     <TemplateEditorLayout classes={{ root: classes.root }}>
       <TemplateEditorLayoutToolbar>
@@ -207,23 +219,34 @@ export const TemplateFormPreviewer = ({
           />
         </TemplateEditorToolbar>
       </TemplateEditorLayoutToolbar>
-      <TemplateEditorLayoutFiles classes={{ root: classes.files }}>
-        <TemplateEditorTextArea
-          content={templateYaml}
-          onUpdate={setTemplateYaml}
-          errorText={errorText}
-        />
-      </TemplateEditorLayoutFiles>
-      <TemplateEditorLayoutPreview>
-        <TemplateEditorForm
-          content={templateYaml}
-          contentIsSpec
-          fieldExtensions={customFieldExtensions}
-          setErrorText={setErrorText}
-          layouts={layouts}
-          formProps={formProps}
-        />
-      </TemplateEditorLayoutPreview>
+      <TemplateEditorLayoutAdjustableArea ref={containerRef}>
+        <TemplateEditorLayoutFiles
+          classes={{ root: classes.files }}
+          style={{ flexBasis: `${filesPanelWidth}%` }}
+        >
+          <TemplateEditorTextArea
+            content={templateYaml}
+            onUpdate={setTemplateYaml}
+            errorText={errorText}
+          />
+        </TemplateEditorLayoutFiles>
+        <TemplateEditorLayoutAdjustablePanel>
+          <AdjustablePanelWidthButton
+            onMouseDown={handleMouseDown}
+            onKeyDown={handleResizeKeyDown}
+          />
+        </TemplateEditorLayoutAdjustablePanel>
+        <TemplateEditorLayoutPreview>
+          <TemplateEditorForm
+            content={templateYaml}
+            contentIsSpec
+            fieldExtensions={customFieldExtensions}
+            setErrorText={setErrorText}
+            layouts={layouts}
+            formProps={formProps}
+          />
+        </TemplateEditorLayoutPreview>
+      </TemplateEditorLayoutAdjustableArea>
     </TemplateEditorLayout>
   );
 };

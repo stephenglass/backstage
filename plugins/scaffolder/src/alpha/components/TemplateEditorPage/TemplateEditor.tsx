@@ -34,7 +34,8 @@ import {
   TemplateEditorLayoutFiles,
   TemplateEditorLayoutPreview,
   TemplateEditorLayoutConsole,
-  TemplateEditorLayoutMainPanels,
+  TemplateEditorLayoutAdjustableArea,
+  TemplateEditorLayoutAdjustablePanel,
 } from './TemplateEditorLayout';
 import { TemplateEditorToolbar } from './TemplateEditorToolbar';
 import { TemplateEditorToolbarFileMenu } from './TemplateEditorToolbarFileMenu';
@@ -98,16 +99,18 @@ export const TemplateEditor = (props: {
           <TemplateEditorLayoutBrowser>
             <TemplateEditorBrowser onClose={closeDirectory} />
           </TemplateEditorLayoutBrowser>
-          <TemplateEditorLayoutMainPanels ref={containerRef}>
+          <TemplateEditorLayoutAdjustableArea ref={containerRef}>
             <TemplateEditorLayoutFiles
-              style={{ flexBasis: `${filesPanelWidth}%`, height: '100%' }}
+              style={{ flexBasis: `${filesPanelWidth}%` }}
             >
               <TemplateEditorTextArea.DirectoryEditor errorText={errorText} />
             </TemplateEditorLayoutFiles>
-            <AdjustablePanelWidthButton
-              onMouseDown={handleMouseDown}
-              onKeyDown={handleResizeKeyDown}
-            />
+            <TemplateEditorLayoutAdjustablePanel>
+              <AdjustablePanelWidthButton
+                onMouseDown={handleMouseDown}
+                onKeyDown={handleResizeKeyDown}
+              />
+            </TemplateEditorLayoutAdjustablePanel>
             <TemplateEditorLayoutPreview>
               <TemplateEditorForm.DirectoryEditorDryRun
                 setErrorText={setErrorText}
@@ -116,7 +119,7 @@ export const TemplateEditor = (props: {
                 formProps={formProps}
               />
             </TemplateEditorLayoutPreview>
-          </TemplateEditorLayoutMainPanels>
+          </TemplateEditorLayoutAdjustableArea>
           <TemplateEditorLayoutConsole>
             <DryRunResults />
           </TemplateEditorLayoutConsole>
