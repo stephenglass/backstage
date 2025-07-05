@@ -98,7 +98,7 @@ export const TemplateEditorLayoutAdjustableArea = withStyles(
 export const TemplateEditorLayoutAdjustablePanel = withStyles(
   theme => ({
     root: {
-      [theme.breakpoints.down('md')]: {
+      [theme.breakpoints.down('sm')]: {
         display: 'none',
       },
     },
