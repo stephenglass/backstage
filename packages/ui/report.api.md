@@ -208,16 +208,31 @@ export const Card: ForwardRefExoticComponent<
 >;
 
 // @public
+export const CardBody: ForwardRefExoticComponent<
+  CardBodyProps & RefAttributes<HTMLDivElement>
+>;
+
+// @public
 export interface CardBodyProps extends React.HTMLAttributes<HTMLDivElement> {
   // (undocumented)
   children?: React.ReactNode;
 }
 
 // @public
+export const CardFooter: ForwardRefExoticComponent<
+  CardFooterProps & RefAttributes<HTMLDivElement>
+>;
+
+// @public
 export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   // (undocumented)
   children?: React.ReactNode;
 }
+
+// @public
+export const CardHeader: ForwardRefExoticComponent<
+  CardHeaderProps & RefAttributes<HTMLDivElement>
+>;
 
 // @public
 export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -437,10 +452,6 @@ export const componentDefinitions: {
       readonly toolbarControls: 'bui-HeaderToolbarControls';
       readonly toolbarIcon: 'bui-HeaderToolbarIcon';
       readonly toolbarName: 'bui-HeaderToolbarName';
-      readonly breadcrumbs: 'bui-HeaderBreadcrumbs';
-      readonly breadcrumb: 'bui-HeaderBreadcrumb';
-      readonly breadcrumbLink: 'bui-HeaderBreadcrumbLink';
-      readonly breadcrumbSeparator: 'bui-HeaderBreadcrumbSeparator';
       readonly tabsWrapper: 'bui-HeaderTabsWrapper';
     };
   };
@@ -448,15 +459,9 @@ export const componentDefinitions: {
     readonly classNames: {
       readonly root: 'bui-HeaderPage';
       readonly content: 'bui-HeaderPageContent';
+      readonly breadcrumbs: 'bui-HeaderPageBreadcrumbs';
       readonly tabsWrapper: 'bui-HeaderPageTabsWrapper';
       readonly controls: 'bui-HeaderPageControls';
-      readonly sticky: 'bui-HeaderPageSticky';
-      readonly stickyWrapper: 'bui-HeaderPageStickyWrapper';
-      readonly stickyContent: 'bui-HeaderPageStickyContent';
-      readonly breadcrumbs: 'bui-HeaderPageBreadcrumbs';
-      readonly breadcrumb: 'bui-HeaderPageBreadcrumb';
-      readonly breadcrumbLink: 'bui-HeaderPageBreadcrumbLink';
-      readonly breadcrumbSeparator: 'bui-HeaderPageBreadcrumbSeparator';
     };
   };
   readonly Heading: {
